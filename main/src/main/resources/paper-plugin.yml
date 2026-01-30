@@ -25,9 +25,6 @@ dependencies:
     CoinsEngine:
       load: AFTER
       required: false
-    BeastTokens:
-      load: AFTER
-      required: false
     EliteMobs:
       load: AFTER
       required: false

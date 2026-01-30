@@ -13,7 +13,6 @@ public class CurrencyId {
     public static final String ULTRA_ECONOMY_PREFIX = "ultraeconomy_";
 
     public static final String PLAYER_POINTS = "playerpoints";
-    public static final String BEAST_TOKENS  = "beasttokens";
     public static final String VOTING_PLUGIN = "votingplugin";
     public static final String ELITE_MOBS    = "elitemobs";
     public static final String VAULT         = "vault";
