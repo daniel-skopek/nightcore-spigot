@@ -87,7 +87,12 @@ public class IconLocale extends LangEntry<IconLocale.Value> {
 
         @NotNull
         public Builder name(@NotNull String name, @NotNull TagWrapper color) {
-            this.name = color.and(TagWrappers.BOLD).wrap(name);
+            return this.rawName(color.and(TagWrappers.BOLD).wrap(name));
+        }
+
+        @NotNull
+        public Builder rawName(@NotNull String name) {
+            this.name = name;
             return this;
         }
 
@@ -103,14 +108,22 @@ public class IconLocale extends LangEntry<IconLocale.Value> {
         }
 
         @NotNull
-        public Builder appendCurrent(@NotNull String type, @NotNull String value) {
-            return this.appendCurrent(type, value, this.accentColor);
+        public Builder rawLore(@NotNull String... text) {
+            this.lore.addAll(Lists.newList(text));
+            return this;
         }
 
         @NotNull
-        public Builder appendCurrent(@NotNull String type, @NotNull String value, @NotNull TagWrapper color) {
-            this.appendInfo(color.wrap("● ") + type + ": " + color.wrap(value));
+        public Builder appendCurrent(@NotNull String type, @NotNull String value) {
+            this.appendInfo(TagWrappers.DARK_GRAY.wrap("» ") + type + ": " + TagWrappers.WHITE.wrap(value));
             return this;
+        }
+
+        @NotNull
+        @Deprecated
+        public Builder appendCurrent(@NotNull String type, @NotNull String value, @NotNull TagWrapper color) {
+            //this.appendInfo(TagWrappers.DARK_GRAY.wrap("» ") + type + ": " + TagWrappers.WHITE.wrap(value));
+            return this.appendCurrent(type, value);
         }
 
         @NotNull

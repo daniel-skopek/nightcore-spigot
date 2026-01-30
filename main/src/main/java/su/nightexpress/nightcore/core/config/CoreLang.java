@@ -3,10 +3,7 @@ package su.nightexpress.nightcore.core.config;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nightcore.locale.LangContainer;
 import su.nightexpress.nightcore.locale.LangEntry;
-import su.nightexpress.nightcore.locale.entry.BooleanLocale;
-import su.nightexpress.nightcore.locale.entry.IconLocale;
-import su.nightexpress.nightcore.locale.entry.MessageLocale;
-import su.nightexpress.nightcore.locale.entry.TextLocale;
+import su.nightexpress.nightcore.locale.entry.*;
 import su.nightexpress.nightcore.locale.message.MessageData;
 
 import static su.nightexpress.nightcore.util.Placeholders.*;
@@ -33,6 +30,10 @@ public final class CoreLang implements LangContainer {
     public static final TextLocale COMMAND_RELOAD_DESC    = LangEntry.builder("Command.Reload.Desc").text("Reload the plugin.");
     public static final TextLocale COMMAND_CHECKPERM_DESC = LangEntry.builder("Command.CheckPerm.Desc").text("Print player permissions info.");
     public static final TextLocale COMMAND_DUMPITEM_DESC  = LangEntry.builder("Command.DumpItem.Desc").text("Print item NBT info.");
+
+    public static final TextLocale COMMAND_ECONOMY_BRIDGE_NAME           = LangEntry.builder("Command.EconomyBridge.Name").text("Economy Bridge");
+    public static final TextLocale COMMAND_ECONOMY_BRIDGE_DESC           = LangEntry.builder("Command.EconomyBridge.Desc").text("Economy Bridge commands.");
+    public static final TextLocale COMMAND_ECONOMY_BRIDGE_FROM_ITEM_DESC = LangEntry.builder("Command.EconomyBridge.FromItem.Desc").text("Create item currency.");
 
     public static final MessageLocale COMMAND_SYNTAX_GENERIC_ERROR = LangEntry.builder("Command.Syntax.GenericError")
         .chatMessage(GRAY.wrap(SOFT_RED.wrap(GENERIC_INPUT) + " is not a valid " + SOFT_RED.wrap(GENERIC_NAME) + " argument!"));
@@ -95,6 +96,18 @@ public final class CoreLang implements LangContainer {
         .chatMessage(GRAY.wrap("Plugin " + GREEN.wrap("reloaded") + "!"));
 
 
+    public static final MessageLocale ECONOMY_BRIDGE_FROM_ITEM_NOTHING = LangEntry.builder("EconomyBridge.FromItem.Nothing").chatMessage(
+        RED.wrap("You must hold an item in hand!")
+    );
+
+    public static final MessageLocale ECONOMY_BRIDGE_FROM_ITEM_EXISTS = LangEntry.builder("EconomyBridge.FromItem.Exists").chatMessage(
+        RED.wrap("Currency with this name already exists!")
+    );
+
+    public static final MessageLocale ECONOMY_BRIDGE_FROM_ITEM_CREATED = LangEntry.builder("EconomyBridge.FromItem.Created").chatMessage(
+        GRAY.wrap("Created " + YELLOW.wrap(CURRENCY_NAME) + " currency as " + YELLOW.wrap(CURRENCY_ID) + ".")
+    );
+
     public static final MessageLocale ERROR_NO_PERMISSION = LangEntry.builder("Error.NoPermission")
         .chatMessage(SOFT_RED.wrap("You don't have permission to do that!"));
 
@@ -112,8 +125,8 @@ public final class CoreLang implements LangContainer {
     public static final BooleanLocale STATE_YES_NO           = LangEntry.builder("States.YesNo").bool(GREEN.wrap("Yes"), RED.wrap("No"));
     public static final BooleanLocale STATE_ON_OFF           = LangEntry.builder("States.OnOff").bool(GREEN.wrap("ON"), RED.wrap("OFF"));
 
-    public static final TextLocale ENTRY_GOOD = LangEntry.builder("Entry.Good").text(GREEN.wrap("✔") + " " + GRAY.wrap("%s"));
-    public static final TextLocale ENTRY_BAD  = LangEntry.builder("Entry.Bad").text(RED.wrap("✘") + " " + GRAY.wrap("%s"));
+    public static final TextLocale ENTRY_GOOD = LangEntry.builder("Entry.Valid").text(GREEN.wrap("✔") + " " + GRAY.wrap("%s"));
+    public static final TextLocale ENTRY_BAD  = LangEntry.builder("Entry.Invalid").text(RED.wrap("✘") + " " + GRAY.wrap("%s"));
 
     public static final TextLocale OTHER_ANY       = LangEntry.builder("Other.Any").text("Any");
     public static final TextLocale OTHER_NONE      = LangEntry.builder("Other.None").text("None");
@@ -126,6 +139,10 @@ public final class CoreLang implements LangContainer {
     public static final IconLocale MENU_ICON_BACK          = LangEntry.iconBuilder("MenuItem.Back").name("Back", SOFT_YELLOW).build();
     public static final IconLocale MENU_ICON_NEXT_PAGE     = LangEntry.iconBuilder("MenuItem.NextPage").name(UNDERLINED.wrap("Next Page") + " →", WHITE).build();
     public static final IconLocale MENU_ICON_PREVIOUS_PAGE = LangEntry.iconBuilder("MenuItem.PreviousPage").name("← " + UNDERLINED.wrap("Previous Page"), WHITE).build();
+
+    public static final ButtonLocale DIALOG_BUTTON_OK     = LangEntry.builder("Dialog.Button.OK").button(GREEN.wrap("✔") + " OK");
+    public static final ButtonLocale DIALOG_BUTTON_CANCEL = LangEntry.builder("Dialog.Button.Cancel").button(RED.wrap("✘") + " Cancel");
+    public static final ButtonLocale DIALOG_BUTTON_BACK   = LangEntry.builder("Dialog.Button.Back").button(SOFT_YELLOW.wrap("←") + " Back");
 
     @NotNull
     public static String formatEntry(@NotNull String entry, boolean flag) {

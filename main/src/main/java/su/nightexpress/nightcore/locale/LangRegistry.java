@@ -81,8 +81,15 @@ public class LangRegistry extends SimpleManager<NightPlugin> {
      * @see NightPlugin#registerLang(Class)
      */
     public void inject(@NotNull LangContainer langContainer) {
+        this.inject(langContainer.getClass());
+    }
+
+    public void inject(@NotNull Class<? extends LangContainer> langClass) {
         if (this.config != null) {
-            loadEntries(langContainer.getClass(), this.plugin, this.config);
+            loadEntries(langClass, this.plugin, this.config);
+        }
+        else {
+            this.plugin.warn("Lang Container " + langClass.getSimpleName() + " is not injected due to be out of the #enable() phase.");
         }
     }
 
@@ -105,28 +112,6 @@ public class LangRegistry extends SimpleManager<NightPlugin> {
         }
 
         loadEntries(this.elements, this.plugin, this.config);
-
-        /*
-        Map<String, FileConfig> configMap = new HashMap<>();
-        this.elements.forEach(langElement -> {
-            // If user locale is not supported, fallback to the default (English) one.
-            String preferredLocale = langElement.isSupportedLocale(userLocale) ? userLocale : DEFAULT_LANGUAGE;
-
-            // Load each translation from/to it's own locale config file.
-            langElement.getSupportedLocales().forEach(supportedLocale -> {
-                FileConfig config = configMap.computeIfAbsent(supportedLocale, k -> this.getConfig(supportedLocale));
-                if (!config.contains(langElement.getPath())) {
-                    //langElement.write(config);
-                    config.set(langElement.getPath(), langElement.getDefaultValue(supportedLocale));
-                }
-
-                // If supported locale matches user's or default one, read it from the config.
-                if (supportedLocale.equalsIgnoreCase(preferredLocale)) {
-                    langElement.load(this.plugin, config, preferredLocale);
-                }
-            });
-        });
-        configMap.values().forEach(FileConfig::saveChanges);*/
     }
 
     private void updateLegacy() {
@@ -181,14 +166,6 @@ public class LangRegistry extends SimpleManager<NightPlugin> {
             }
         });
     }
-
-    /*@NotNull
-    public FileConfig getConfig() {
-        if (this.config == null) {
-            this.config = FileConfig.loadOrExtract(this.plugin, DIRECTORY, this.getFileName(this.langCode));
-        }
-        return this.config;
-    }*/
 
     @NotNull
     public String getFileName(@NotNull String langCode) {

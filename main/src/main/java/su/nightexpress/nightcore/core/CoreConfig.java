@@ -1,34 +1,54 @@
 package su.nightexpress.nightcore.core;
 
 import su.nightexpress.nightcore.config.ConfigValue;
-import su.nightexpress.nightcore.util.Enums;
-import su.nightexpress.nightcore.util.Placeholders;
-import su.nightexpress.nightcore.util.TimeUtil;
-import su.nightexpress.nightcore.util.Version;
+import su.nightexpress.nightcore.util.*;
 import su.nightexpress.nightcore.util.number.NumberShortcut;
+import su.nightexpress.nightcore.util.time.TimeFormats;
 import su.nightexpress.nightcore.util.wrapper.UniFormatter;
 
 import java.math.RoundingMode;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 
 public class CoreConfig {
 
     public static final String DIR_UI = "/ui/";
 
+    @Deprecated
     public static final ConfigValue<Integer> DATA_FIXER_MISSING_VERSION = ConfigValue.create("DataFixer.MissingVersion",
         Version.MC_1_21_4.getDataVersion()
     );
 
+    @Deprecated
     public static final ConfigValue<Integer> DATA_FIXER_UNKNOWN_VERSION = ConfigValue.create("DataFixer.UnknownVersion",
         10000
     );
+
+    public static final ConfigValue<String> GENERAL_DATE_TIME_FORMAT = ConfigValue.create("General.DateTimeFormat",
+        "dd/MM/yyyy HH:mm"
+    ).whenRead(TimeFormats::setDateTimeFormatter);
 
     public static final ConfigValue<Long> MENU_CLICK_COOLDOWN = ConfigValue.create("Menu.Click_Cooldown",
         150L,
         "Sets cooldown (in milliseconds) for player clicks in GUIs.",
         "[Default is 150ms]"
     );
+
+    public static final ConfigValue<Set<String>> ECONOMY_DISABLED_PROVIDERS = ConfigValue.create("Integrations.Economy.DisabledProviders",
+        Lists.newSet("example_currency", "custom_economy"),
+        "List of economy/currency IDs that will not be handled by the nightcore and it's child plugins."
+    ).onRead(set -> Lists.modify(set, LowerCase.INTERNAL::apply));
+
+    public static final ConfigValue<Boolean> ECONOMY_PLACEHOLDERS_API_FORMAT = ConfigValue.create("Integrations.Economy.PlaceholderAPI_In_Format",
+        true,
+        "Whether to apply " + Plugins.PLACEHOLDER_API + " placeholders in currency's Format setting."
+    );
+
+    public static final ConfigValue<Set<String>> ITEMS_DISABLED_PROVIDERS = ConfigValue.create("Integrations.Items.DisabledProviders",
+        Lists.newSet("CustomSuperItems", "UltimateItemsPlugin"),
+        "List of custom item plugins that will not be handled by the nightcore and it's child plugins."
+    ).onRead(set -> Lists.modify(set, LowerCase.INTERNAL::apply));
 
     @Deprecated
     public static final ConfigValue<Integer> USER_CACHE_LIFETIME = ConfigValue.create("UserData.Cache.LifeTime",
@@ -98,6 +118,19 @@ public class CoreConfig {
         600,
         "How often (in seconds) to purge cached player profiles.",
         "[Default is 600 (10 minutes)]"
+    );
+
+    public static final ConfigValue<Integer> PROFILE_UPDATE_INTERVAL = ConfigValue.create("Profiles.UpdateInterval",
+        1,
+        "How often (in seconds) to perform updates for profiles that were put in update queue.",
+        "",
+        "[Default is 1]"
+    );
+
+    public static final ConfigValue<Integer> PROFILE_UPDATE_AMOUNT = ConfigValue.create("Profiles.UpdateAmount",
+        1,
+        "Amount of profiles to be updated from a queue (see UpdateInterval).",
+        "[Default is 1]"
     );
 
     public static final ConfigValue<Boolean> PROFILE_UPDATE_ON_JOIN = ConfigValue.create("Profiles.UpdateOnJoin",

@@ -1,8 +1,12 @@
 package su.nightexpress.nightcore.util.text.night.tag.handler;
 
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nightcore.bridge.text.event.NightHoverEvent;
+import su.nightexpress.nightcore.util.Strings;
+import su.nightexpress.nightcore.util.Version;
+import su.nightexpress.nightcore.util.nbt.NbtUtil;
 import su.nightexpress.nightcore.util.text.night.ParserUtils;
 import su.nightexpress.nightcore.util.text.night.TextParser;
 import su.nightexpress.nightcore.util.text.night.entry.EntryGroup;
@@ -27,13 +31,13 @@ public class HoverTagHandler extends ClassicTagHandler {
         if (action == NightHoverEvent.Action.SHOW_TEXT) {
             hoverEvent = NightHoverEvent.showText(TextParser.parse(value));
         }
-        // TODO ?
-        /*else if (action == NightHoverEvent.Action.SHOW_ITEM) {
-            ItemStack itemStack = ItemNbt.fromTag(new ItemTag(value, Version.getCurrent().getDataVersion()));
+        else if (action == NightHoverEvent.Action.SHOW_ITEM) {
+            String tag = Strings.fromBase64(value);
+            ItemStack itemStack = NbtUtil.tagToItemStack(tag, Version.getCurrent().getDataVersion());
             if (itemStack == null) return;
 
             hoverEvent = NightHoverEvent.showItem(itemStack);
-        }*/
+        }
         else return;
 
         group.setStyle(style -> style.hoverEvent(hoverEvent));

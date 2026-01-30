@@ -1,7 +1,6 @@
 package su.nightexpress.nightcore.ui.dialog;
 
 import org.bukkit.NamespacedKey;
-import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
@@ -22,7 +21,7 @@ public class DialogWatcher extends AbstractManager<NightCore> implements DialogC
 
     @Override
     protected void onLoad() {
-        this.listener = Software.instance().createDialogListener(this);
+        this.listener = Software.get().createDialogListener(this);
         this.plugin.getPluginManager().registerEvents(this.listener, this.plugin);
     }
 
@@ -39,12 +38,11 @@ public class DialogWatcher extends AbstractManager<NightCore> implements DialogC
     @Override
     public void handleClick(@NotNull DialogClickResult result) {
         NamespacedKey identifier = result.getIdentifier();
-        if (!DialogKeys.isNamespace(identifier)) {
+        if (!DialogKeys.isRightNamespace(identifier)) {
             //this.plugin.debug("Foreign dialog identifier: '" + identifier + "'.");
             return;
         }
 
-        Player player = result.getPlayer();
-        Dialogs.handleClick(player, result);
+        Dialogs.handleClick(result);
     }
 }

@@ -18,6 +18,7 @@ import su.nightexpress.nightcore.locale.entry.IconLocale;
 import su.nightexpress.nightcore.ui.menu.item.MenuItem;
 import su.nightexpress.nightcore.util.BukkitThing;
 import su.nightexpress.nightcore.util.NumberUtil;
+import su.nightexpress.nightcore.util.placeholder.PlaceholderContext;
 import su.nightexpress.nightcore.util.placeholder.Replacer;
 import su.nightexpress.nightcore.util.profile.CachedProfile;
 
@@ -175,6 +176,11 @@ public class NightItem implements Writeable {
         return this;
     }
 
+    @Nullable
+    public Replacer getReplacer() {
+        return this.meta.getReplacer();
+    }
+
     @NotNull
     public NightItem setReplacer(@Nullable Replacer replacer) {
         this.meta.setReplacer(replacer);
@@ -184,6 +190,23 @@ public class NightItem implements Writeable {
     @NotNull
     public NightItem replacement(@NotNull Consumer<Replacer> consumer) {
         this.meta.replacement(consumer);
+        return this;
+    }
+
+    @Nullable
+    public PlaceholderContext getPlaceholderContext() {
+        return this.meta.getPlaceholderContext();
+    }
+
+    @NotNull
+    public NightItem setPlaceholderContext(@Nullable PlaceholderContext placeholderContext) {
+        this.meta.setPlaceholderContext(placeholderContext);
+        return this;
+    }
+
+    @NotNull
+    public NightItem replace(@NotNull Consumer<PlaceholderContext.Builder> consumer) {
+        this.meta.replace(consumer);
         return this;
     }
 
@@ -204,8 +227,6 @@ public class NightItem implements Writeable {
     @NotNull
     @Deprecated
     public NightItem localized(@NotNull LangItem langItem) {
-//        this.setDisplayName(langItem.getLocalizedName());
-//        this.setLore(langItem.getLocalizedLore());
         this.meta.localized(langItem);
         return this;
     }
@@ -275,25 +296,12 @@ public class NightItem implements Writeable {
         return this;
     }
 
-//    @Nullable
-//    @Deprecated
-//    public PlayerProfile getSkullOwner() {
-//        return this.meta.getSkullOwner();
-//    }
-
     @NotNull
     @Deprecated
     public NightItem setSkullOwner(@Nullable OfflinePlayer owner) {
         this.meta.setSkullOwner(owner);
         return this;
     }
-
-//    @NotNull
-//    @Deprecated
-//    public NightItem setSkullOwner(@Nullable PlayerProfile skullOwner) {
-//        this.meta.setSkullOwner(skullOwner);
-//        return this;
-//    }
 
     @Nullable
     public CachedProfile getPlayerProfile() {

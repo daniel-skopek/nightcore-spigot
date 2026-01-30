@@ -9,7 +9,9 @@ import net.md_5.bungee.api.dialog.body.DialogBody;
 import net.md_5.bungee.api.dialog.body.PlainMessageBody;
 import net.md_5.bungee.api.dialog.input.*;
 import org.jetbrains.annotations.NotNull;
+import su.nightexpress.nightcore.bridge.common.NightKey;
 import su.nightexpress.nightcore.bridge.common.NightNbtHolder;
+import su.nightexpress.nightcore.bridge.dialog.DialogKeys;
 import su.nightexpress.nightcore.bridge.dialog.adapter.*;
 import su.nightexpress.nightcore.bridge.dialog.wrap.WrappedDialog;
 import su.nightexpress.nightcore.bridge.dialog.wrap.action.WrappedDialogAction;
@@ -93,7 +95,7 @@ public class SpigotDialogAdapter implements
     @Override
     @NotNull
     public CustomClickAction adaptAction(@NotNull WrappedDialogCustomAction action) {
-        CustomClickAction handle = new CustomClickAction(action.id());
+        CustomClickAction handle = new CustomClickAction(NightKey.key(DialogKeys.NAMESPACE, action.id()).asString());
         handle.additions(action.nbt() == null ? null : action.nbt().payload());
         return handle;
     }
@@ -138,17 +140,7 @@ public class SpigotDialogAdapter implements
     @Override
     @NotNull
     public DialogBody adaptBody(@NotNull WrappedItemDialogBody body) {
-        throw new UnsupportedOperationException("Not implemented.");
-/*        ItemStack item = body.item();
-        WrappedPlainMessageDialogBody description = body.description();
-        boolean showDecorations = body.showDecorations();
-        boolean showTooltip = body.showTooltip();
-        int width = body.width();
-        int height = body.height();
-
-        PlainMessageDialogBody desc = description == null ? null : this.adaptBody(description);
-
-        return DialogBody.item(item, desc, showDecorations, showTooltip, width, height);*/
+        return new PlainMessageBody(this.adaptComponent(body.description() == null ? "" : body.description().contents()), body.width());
     }
 
     @Override

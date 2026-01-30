@@ -1,6 +1,7 @@
 package su.nightexpress.nightcore.commands.argument.type;
 
 import org.jetbrains.annotations.NotNull;
+import su.nightexpress.nightcore.commands.SuggestionsProvider;
 import su.nightexpress.nightcore.commands.argument.ArgumentReader;
 import su.nightexpress.nightcore.commands.argument.ArgumentType;
 import su.nightexpress.nightcore.commands.context.CommandContext;
@@ -8,12 +9,13 @@ import su.nightexpress.nightcore.commands.context.CommandContextBuilder;
 import su.nightexpress.nightcore.commands.exceptions.CommandSyntaxException;
 import su.nightexpress.nightcore.core.config.CoreLang;
 import su.nightexpress.nightcore.util.NumberUtil;
+import su.nightexpress.nightcore.util.Numbers;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-public class IntegerArgumentType implements ArgumentType<Integer> {
+public class IntegerArgumentType implements ArgumentType<Integer>, SuggestionsProvider {
 
     private static final List<String> EXAMPLES = Arrays.asList("0", "123", "-123");
 
@@ -35,7 +37,7 @@ public class IntegerArgumentType implements ArgumentType<Integer> {
             parse = NumberUtil.parseIntCompact(string);
         }
         else {
-            parse = NumberUtil.parseInteger(string);
+            parse = Numbers.parseInteger(string);
         }
 
         int result = parse.orElseThrow(() -> CommandSyntaxException.custom(CoreLang.COMMAND_SYNTAX_NUMBER_NOT_INTEGER));

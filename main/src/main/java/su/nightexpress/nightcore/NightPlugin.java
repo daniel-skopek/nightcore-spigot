@@ -1,9 +1,17 @@
 package su.nightexpress.nightcore;
 
+import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+import su.nightexpress.nightcore.bridge.chat.UniversalChatEventHandler;
+import su.nightexpress.nightcore.bridge.scheduler.AdaptedScheduler;
 import su.nightexpress.nightcore.command.CommandManager;
 import su.nightexpress.nightcore.command.api.NightPluginCommand;
 import su.nightexpress.nightcore.commands.command.NightCommand;
@@ -12,12 +20,14 @@ import su.nightexpress.nightcore.config.PluginDetails;
 import su.nightexpress.nightcore.core.config.CoreLang;
 import su.nightexpress.nightcore.language.LangManager;
 import su.nightexpress.nightcore.locale.LangContainer;
-import su.nightexpress.nightcore.locale.LangElement;
 import su.nightexpress.nightcore.locale.LangRegistry;
 import su.nightexpress.nightcore.menu.impl.AbstractMenu;
 import su.nightexpress.nightcore.ui.menu.MenuRegistry;
 import su.nightexpress.nightcore.util.FileUtil;
+import su.nightexpress.nightcore.util.Lists;
 import su.nightexpress.nightcore.util.Reflex;
+import su.nightexpress.nightcore.util.Version;
+import su.nightexpress.nightcore.util.bridge.Software;
 import su.nightexpress.nightcore.util.wrapper.UniPermission;
 
 import java.io.File;
@@ -28,6 +38,8 @@ public abstract class NightPlugin extends JavaPlugin implements NightCorePlugin 
 
     public static final String CONFIG_FILE = "config.yml";
     public static final String ENGINE_FILE = "engine.yml";
+
+    protected AdaptedScheduler scheduler;
 
     protected NightCommand   rootCommand;
     protected List<Runnable> postLoaders;
@@ -42,11 +54,13 @@ public abstract class NightPlugin extends JavaPlugin implements NightCorePlugin 
 
     @Override
     public void onEnable() {
-        if (!Engine.handleEnable(this)) {
+        if (!this.onInit() || !this.checkVersion()) {
+            this.getPluginManager().disablePlugin(this);
             return;
         }
 
         long loadTook = System.currentTimeMillis();
+        this.scheduler = Software.get().getScheduler(this);
         this.onStartup();
         this.loadManagers();
         this.info("Plugin loaded in " + (System.currentTimeMillis() - loadTook) + " ms!");
@@ -56,6 +70,13 @@ public abstract class NightPlugin extends JavaPlugin implements NightCorePlugin 
     public void onDisable() {
         this.unloadManagers();
         this.onShutdown();
+    }
+
+    protected boolean onInit() {
+        NightCore.CHILDRENS.add(this);
+        this.info("Powered by " + NightCore.get().getName());
+
+        return true;
     }
 
     protected void onStartup() {
@@ -190,11 +211,10 @@ public abstract class NightPlugin extends JavaPlugin implements NightCorePlugin 
     }
 
     protected void unloadManagers() {
-        this.getScheduler().cancelTasks(this);  // Stop all plugin tasks.
+        this.scheduler.cancelTasks(); // Stop all plugin tasks.
 
         this.disable();
 
-        // TODO Close dialogs?
         AbstractMenu.clearAll(this);            // Close all GUIs.
         MenuRegistry.closeAll();
         HandlerList.unregisterAll(this);        // Unregister all plugin listeners.
@@ -248,18 +268,31 @@ public abstract class NightPlugin extends JavaPlugin implements NightCorePlugin 
         return this.commandManager;
     }
 
+    @Override
+    public void registerListener(@NotNull Listener listener) {
+        this.getPluginManager().registerEvents(listener, this);
+    }
+
+    @Override
+    public void addChatHandler(@NotNull EventPriority priority, @NotNull UniversalChatEventHandler handler) {
+        NightCore.get().addChatHandler(priority, handler);
+    }
+
+    @Override
+    public void removeChatHandler(@NotNull UniversalChatEventHandler handler) {
+        NightCore.get().removeChatHandler(handler);
+    }
+
     public void registerLang(@NotNull Class<? extends LangContainer> clazz) {
         this.langRegistry.register(clazz);
     }
 
-    /**
-     * Saves and loads {@link LangElement} objects from the provided {@link LangContainer} object into the lang config file according to selected
-     * language during the "enable" plugin's phase if the same can not be achieved through {@link NightPlugin#registerLang(Class)}
-     * <br>
-     * <b>Note:</b> This can not be used outside of the {@link NightPlugin#enable()} phase.
-     * @param langContainer LangContainer object with some LangElement fields defined.
-     * @see NightPlugin#registerLang(Class)
-     */
+    @Override
+    public void injectLang(@NotNull Class<? extends LangContainer> langClass) {
+        this.langRegistry.inject(langClass);
+    }
+
+    @Override
     public void injectLang(@NotNull LangContainer langContainer) {
         this.langRegistry.inject(langContainer);
     }
@@ -284,8 +317,93 @@ public abstract class NightPlugin extends JavaPlugin implements NightCorePlugin 
         FileUtil.extractResources(this.getFile(), jarPath, destination);
     }
 
+    private boolean checkVersion() {
+        Version current = Version.getCurrent();
+        if (current != Version.UNKNOWN && current.isSupported()) return true;
+
+        this.warn("=".repeat(35));
+
+        if (current == Version.UNKNOWN) {
+            this.warn("WARNING: This plugin is not supposed to run on this server version!");
+            this.warn("If server version is newer than " + Version.values()[Version.values().length - 2] + ", then wait for an update please.");
+            this.warn("The plugin may not work properly.");
+        }
+        else if (current.isDeprecated()) {
+            this.warn("WARNING: You're running an outdated server version (" + current.getLocalized() + ")!");
+            this.warn("This version will no longer be supported in future relases.");
+            this.warn("Please upgrade your server to " + Lists.next(current, (Version::isSupported)).getLocalized() + ".");
+        }
+        else if (current.isDropped()) {
+            this.error("ERROR: You're running an unsupported server version (" + current.getLocalized() + ")!");
+            this.error("Please upgrade your server to " + Lists.next(current, (Version::isSupported)).getLocalized() + ".");
+        }
+
+        this.warn("ABSOLUTELY NO DISCORD SUPPORT WILL BE PROVIDED");
+        this.warn("=".repeat(35));
+
+        return !current.isDropped();
+    }
+
     @Override
-    public void runTask(@NotNull Runnable runnable) {
-        this.getScheduler().runTask(this, runnable);
+    @NotNull
+    public PluginManager getPluginManager() {
+        return this.getServer().getPluginManager();
+    }
+
+    @Override
+    @NotNull
+    public AdaptedScheduler scheduler() {
+        return this.scheduler;
+    }
+
+    @Override
+    @NotNull
+    public su.nightexpress.nightcore.ui.inventory.MenuRegistry getMenuRegistry() {
+        return NightCore.get().getMenuRegistry();
+    }
+
+    @Override
+    public void runTask(@NotNull Runnable consumer) {
+        this.scheduler.runTask(consumer);
+    }
+
+    @Override
+    public void runTask(@NotNull Entity entity, @NotNull Runnable runnable) {
+        this.scheduler.runTask(entity, runnable);
+    }
+
+    @Override
+    public void runTask(@NotNull Location location, @NotNull Runnable runnable) {
+        this.scheduler.runTask(location, runnable);
+    }
+
+    @Override
+    public void runTask(@NotNull Chunk chunk, @NotNull Runnable runnable) {
+        this.scheduler.runTask(chunk, runnable);
+    }
+
+    @Override
+    public void runTaskAsync(@NotNull Runnable consumer) {
+        this.scheduler.runTaskAsync(consumer);
+    }
+
+    @Override
+    public void runTaskLater(@NotNull Runnable consumer, long delay) {
+        this.scheduler.runTaskLater(consumer, delay);
+    }
+
+    @Override
+    public void runTaskLaterAsync(@NotNull Runnable consumer, long delay) {
+        this.scheduler.runTaskLaterAsync(consumer, delay);
+    }
+
+    @Override
+    public void runTaskTimer(@NotNull Runnable consumer, long delay, long interval) {
+        this.scheduler.runTaskTimer(consumer, delay, interval);
+    }
+
+    @Override
+    public void runTaskTimerAsync(@NotNull Runnable consumer, long delay, long interval) {
+        this.scheduler.runTaskTimerAsync(consumer, delay, interval);
     }
 }

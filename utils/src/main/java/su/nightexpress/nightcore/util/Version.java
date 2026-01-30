@@ -22,12 +22,16 @@ public enum Version {
     MC_1_21_6("1.21.6", 4435, Status.OUTDATED),
     MC_1_21_7("1.21.7", 4438, Status.OUTDATED),
     MC_1_21_8("1.21.8", 4440),
-    UNKNOWN("Unknown", 0),
+    MC_1_21_9("1.21.9", 4554, Status.OUTDATED),
+    MC_1_21_10("1.21.10", 4556),
+    MC_1_21_11("1.21.11", 4671),
+    UNKNOWN("Unknown", 10000),
     ;
 
-    private static Version current;
-    private static boolean isPaper;
+    private static final boolean isPaper = checkPaper();
+    private static final boolean isFolia = checkFolia();
 
+    private static Version current;
     private final Status status;
     private final int    dataVersion;
     private final String localized;
@@ -54,7 +58,6 @@ public enum Version {
         String exact = bukkitVersion.split("-")[0];
 
         current = Stream.of(values()).sorted(Comparator.reverseOrder()).filter(version -> exact.equalsIgnoreCase(version.getLocalized())).findFirst().orElse(UNKNOWN);
-        isPaper = checkPaper();
 
         return current;
     }
@@ -66,12 +69,24 @@ public enum Version {
         return current;
     }
 
+    public static boolean withDialogs() {
+        return isAtLeast(MC_1_21_7);
+    }
+
+    public static boolean withCopperAge() {
+        return isAtLeast(MC_1_21_9);
+    }
+
     public static boolean isSpigot() {
         return !isPaper;
     }
 
     public static boolean isPaper() {
         return isPaper;
+    }
+
+    public static boolean isFolia() {
+        return isFolia;
     }
 
     public boolean isDeprecated() {
@@ -128,13 +143,11 @@ public enum Version {
         return this == Version.getCurrent();
     }
 
-    public static boolean checkPaper() {
-        try {
-            Class.forName("com.destroystokyo.paper.ParticleBuilder");
-            return true;
-        }
-        catch (ClassNotFoundException e) {
-            return false;
-        }
+    private static boolean checkPaper() {
+        return Reflex.classExists("com.destroystokyo.paper.ParticleBuilder");
+    }
+
+    private static boolean checkFolia() {
+        return Reflex.classExists("io.papermc.paper.threadedregions.RegionizedServer");
     }
 }

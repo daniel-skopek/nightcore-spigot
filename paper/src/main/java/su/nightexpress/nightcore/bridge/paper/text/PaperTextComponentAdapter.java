@@ -15,7 +15,6 @@ import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import org.bukkit.NamespacedKey;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -29,10 +28,7 @@ import su.nightexpress.nightcore.bridge.text.adapter.TextComponentAdapter;
 import su.nightexpress.nightcore.bridge.text.event.NightClickEvent;
 import su.nightexpress.nightcore.bridge.text.event.NightHoverEvent;
 import su.nightexpress.nightcore.bridge.text.event.WrappedPayload;
-import su.nightexpress.nightcore.bridge.text.impl.NightKeybindComponent;
-import su.nightexpress.nightcore.bridge.text.impl.NightTextComponent;
-import su.nightexpress.nightcore.bridge.text.impl.NightTranslatableComponent;
-import su.nightexpress.nightcore.bridge.text.impl.NightTranslationArgument;
+import su.nightexpress.nightcore.bridge.text.impl.*;
 import su.nightexpress.nightcore.util.Lists;
 import su.nightexpress.nightcore.util.Version;
 import su.nightexpress.nightcore.util.bridge.wrapper.NightComponent;
@@ -78,7 +74,7 @@ public class PaperTextComponentAdapter implements TextComponentAdapter<Component
         return switch (nightClickEvent.action()) {
             case CUSTOM -> {
                 WrappedPayload.Custom custom = (WrappedPayload.Custom) payload;
-                NamespacedKey namespacedKey = custom.key();
+                NightKey namespacedKey = custom.key();
                 Key key = Key.key(namespacedKey.namespace(), namespacedKey.value());
                 BinaryTagHolder nbt = BinaryTagHolder.binaryTagHolder(custom.nbt().asString());
 
@@ -160,14 +156,6 @@ public class PaperTextComponentAdapter implements TextComponentAdapter<Component
 
     @NotNull
     public List<Component> adaptComponents(@NotNull List<NightComponent> components) {
-/*        var builder = Component.text().decorations(Lists.newSet(TextDecoration.values()), false);
-
-        components.forEach(child -> {
-            builder.append(this.adaptComponent(child));
-        });
-
-        return builder.build();*/
-
         return Lists.modify(components, this::adaptComponent);
     }
 
@@ -218,6 +206,16 @@ public class PaperTextComponentAdapter implements TextComponentAdapter<Component
             .append(this.adaptComponents(component.children()))
             .keybind(component.key())
         );
+    }
+
+    @Override
+    @NotNull
+    public Component adaptComponent(@NotNull NightObjectComponent component) {
+        return Component.object()
+            .style(this.adaptStyle(component.style()))
+            .append(this.adaptComponents(component.children()))
+            .contents(PaperObjectContantsAdapter.get().adaptContents(component.contents()))
+            .build();
     }
 
     // Quick fix for <1.21.4 loading.

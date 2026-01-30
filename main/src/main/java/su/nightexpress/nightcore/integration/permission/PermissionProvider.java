@@ -5,10 +5,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public interface PermissionProvider {
 
-    void setup();
+    //void setup();
 
     @NotNull String getName();
 
@@ -19,4 +21,12 @@ public interface PermissionProvider {
     @Nullable String getPrefix(@NotNull Player player);
 
     @Nullable String getSuffix(@NotNull Player player);
+
+    @NotNull CompletableFuture<String> getPrimaryGroup(@NotNull UUID playerId);
+
+    @NotNull CompletableFuture<Set<String>> getPermissionGroups(@NotNull UUID playerId);
+
+    @NotNull CompletableFuture<String> getPrefix(@NotNull UUID playerId);
+
+    @NotNull CompletableFuture<String> getSuffix(@NotNull UUID playerId);
 }

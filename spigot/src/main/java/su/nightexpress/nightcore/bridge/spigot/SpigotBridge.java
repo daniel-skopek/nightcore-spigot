@@ -1,10 +1,7 @@
 package su.nightexpress.nightcore.bridge.spigot;
 
 import net.md_5.bungee.api.dialog.Dialog;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.Translatable;
+import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
@@ -12,16 +9,17 @@ import org.bukkit.boss.BossBar;
 import org.bukkit.command.Command;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MenuType;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.profile.PlayerProfile;
 import org.jetbrains.annotations.NotNull;
@@ -29,13 +27,18 @@ import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nightcore.bridge.bossbar.NightBarColor;
 import su.nightexpress.nightcore.bridge.bossbar.NightBarFlag;
 import su.nightexpress.nightcore.bridge.bossbar.NightBarOverlay;
+import su.nightexpress.nightcore.bridge.chat.UniversalChatListenerCallback;
 import su.nightexpress.nightcore.bridge.dialog.adapter.DialogAdapter;
 import su.nightexpress.nightcore.bridge.dialog.response.DialogClickHandler;
 import su.nightexpress.nightcore.bridge.dialog.wrap.WrappedDialog;
+import su.nightexpress.nightcore.bridge.scheduler.AdaptedScheduler;
 import su.nightexpress.nightcore.bridge.spigot.bossbar.SpigotBossBar;
 import su.nightexpress.nightcore.bridge.spigot.bossbar.SpigotBossBarAdapter;
 import su.nightexpress.nightcore.bridge.spigot.dialog.SpigotDialogAdapter;
 import su.nightexpress.nightcore.bridge.spigot.dialog.SpigotDialogListener;
+import su.nightexpress.nightcore.bridge.spigot.event.SpigotChatListener;
+import su.nightexpress.nightcore.bridge.spigot.event.SpigotEventAdapter;
+import su.nightexpress.nightcore.bridge.spigot.scheduler.SpigotScheduler;
 import su.nightexpress.nightcore.bridge.spigot.text.SpigotTextComponentAdapter;
 import su.nightexpress.nightcore.bridge.wrap.NightProfile;
 import su.nightexpress.nightcore.util.*;
@@ -43,7 +46,6 @@ import su.nightexpress.nightcore.util.bridge.Software;
 import su.nightexpress.nightcore.util.bridge.wrapper.NightComponent;
 
 import java.util.*;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -58,6 +60,7 @@ public class SpigotBridge implements Software {
 
     private SpigotTextComponentAdapter textComponentAdapter;
     private DialogAdapter<?>              dialogAdapter;
+    private SpigotEventAdapter eventAdapter;
 
     private Set<ItemFlag>      commonFlagsToHide;
 
@@ -85,6 +88,7 @@ public class SpigotBridge implements Software {
             );
         }
 
+        this.eventAdapter = new SpigotEventAdapter();
         return true;
     }
 
@@ -93,12 +97,10 @@ public class SpigotBridge implements Software {
     }
 
     private static void loadEntityCounter() {
-        Class<?> entityClass = Reflex.getClass("net.minecraft.world.entity", "Entity");
+        Class<?> entityClass = Reflex.findClass("net.minecraft.world.entity", "Entity").orElse(null);
         if (entityClass == null) return;
 
-        String fieldName = Version.isBehind(Version.MC_1_20_6) ? "d" : "c";
-
-        Object object = Reflex.getFieldValue(entityClass, fieldName);
+        Object object = Reflex.getFieldValue(entityClass, "c");
         if (!(object instanceof AtomicInteger atomicInteger)) return;
 
         entityCounter = atomicInteger;
@@ -106,8 +108,31 @@ public class SpigotBridge implements Software {
 
     @Override
     @NotNull
+    public SpigotEventAdapter eventAdapter() {
+        return this.eventAdapter;
+    }
+
+    @Override
+    @NotNull
+    public AdaptedScheduler getScheduler(@NotNull JavaPlugin plugin) {
+        return new SpigotScheduler(plugin);
+    }
+
+    @Override
+    @NotNull
+    public Listener createChatListener(@NotNull UniversalChatListenerCallback callback) {
+        return new SpigotChatListener(this, callback);
+    }
+
+    @Override
+    @NotNull
     public Listener createDialogListener(@NotNull DialogClickHandler handler) {
         return new SpigotDialogListener(handler);
+    }
+
+    @Override
+    public void disallowLogin(@NotNull AsyncPlayerPreLoginEvent event, @NotNull AsyncPlayerPreLoginEvent.Result result, @NotNull NightComponent message) {
+        event.disallow(result, message.toLegacy());
     }
 
     @Override
@@ -245,15 +270,60 @@ public class SpigotBridge implements Software {
     }
 
 
+    @Override
+    @NotNull
+    public String getDisplayNameSerialized(@NotNull Player player) {
+        return LegacyColors.plainColors(player.getDisplayName());
+    }
 
     @Override
-    public void setCustomName(@NotNull Entity entity, @NotNull NightComponent component) {
-        entity.setCustomName(component.toLegacy());
+    public void setDisplayName(@NotNull Player player, @NotNull NightComponent component) {
+        player.setDisplayName(component.toLegacy());
     }
 
     @Override
     @Nullable
-    public String getEntityName(@NotNull Entity entity) {
+    public String getPlayerListHeaderSerialized(@NotNull Player player) {
+        String header = player.getPlayerListHeader();
+        return header == null ? null : LegacyColors.plainColors(header);
+    }
+
+    @Override
+    @Nullable
+    public String getPlayerListFooterSerialized(@NotNull Player player) {
+        String footer = player.getPlayerListFooter();
+        return footer == null ? null : LegacyColors.plainColors(footer);
+    }
+
+    @Override
+    public void setPlayerListHeaderFooter(@NotNull Player player, @Nullable NightComponent header, @Nullable NightComponent footer) {
+        player.setPlayerListHeaderFooter(header == null ? null : header.toLegacy(), footer == null ? null : footer.toLegacy());
+    }
+
+    @Override
+    @NotNull
+    public String getPlayerListNameSerialized(@NotNull Player player) {
+        return LegacyColors.plainColors(player.getPlayerListName());
+    }
+
+    @Override
+    public void setPlayerListName(@NotNull Player player, @NotNull NightComponent name) {
+        player.setPlayerListName(name.toLegacy());
+    }
+
+    @Override
+    public void kick(@NotNull Player player, @Nullable NightComponent component) {
+        player.kickPlayer(component == null ? null : component.toLegacy());
+    }
+
+    @Override
+    public void setCustomName(@NotNull Nameable entity, @Nullable NightComponent component) {
+        entity.setCustomName(component == null ? null : component.toLegacy());
+    }
+
+    @Override
+    @Nullable
+    public String getCustomName(@NotNull Nameable entity) {
         String name = entity.getCustomName();
         return name == null ? null : LegacyColors.plainColors(name);
     }

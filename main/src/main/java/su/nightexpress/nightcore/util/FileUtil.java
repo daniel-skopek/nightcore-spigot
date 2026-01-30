@@ -8,10 +8,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Stream;
@@ -34,6 +38,20 @@ public class FileUtil {
         }
     }
 
+    public static boolean createFileIfNotExists(@NotNull Path path) {
+        if (Files.exists(path)) return false;
+
+        try {
+            Files.createDirectories(path.getParent());
+            Files.createFile(path);
+            return true;
+        }
+        catch (IOException exception) {
+            exception.printStackTrace();
+            return false;
+        }
+    }
+
     public static boolean create(@NotNull File file) {
         if (file.exists()) return false;
 
@@ -48,6 +66,15 @@ public class FileUtil {
             exception.printStackTrace();
             return false;
         }
+    }
+
+    @NotNull
+    public static String getNameWithoutExtension(@NotNull Path path) {
+        String fileName = path.getFileName().toString();
+        int index = fileName.lastIndexOf('.');
+        if (index == -1) return fileName;
+
+        return fileName.substring(0, index);
     }
 
     @NotNull
@@ -89,6 +116,30 @@ public class FileUtil {
             }
         }
         return files;
+    }
+
+    @NotNull
+    public static List<Path> findFiles(@NotNull String directoryPath) {
+        return findFiles(directoryPath, Files::isRegularFile);
+    }
+
+    @NotNull
+    public static List<Path> findYamlFiles(@NotNull String directoryPath) {
+        return findFiles(directoryPath, path -> Files.isRegularFile(path) && path.toString().endsWith(FileConfig.EXTENSION));
+    }
+
+    @NotNull
+    public static List<Path> findFiles(@NotNull String directoryPath, @NotNull Predicate<Path> predicate) {
+        Path path = Paths.get(directoryPath);
+        if (!Files.exists(path)) return Collections.emptyList();
+
+        try (Stream<Path> stream = Files.list(path)) {
+            return stream.filter(predicate).toList();
+        }
+        catch (IOException exception) {
+            exception.printStackTrace();
+            return Collections.emptyList();
+        }
     }
 
     @NotNull

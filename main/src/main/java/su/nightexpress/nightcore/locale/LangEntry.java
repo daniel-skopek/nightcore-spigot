@@ -11,6 +11,8 @@ import su.nightexpress.nightcore.locale.entry.*;
 import su.nightexpress.nightcore.locale.message.MessageData;
 import su.nightexpress.nightcore.util.bridge.RegistryType;
 
+import java.util.function.Function;
+
 public class LangEntry<T extends LangValue> implements LangElement {
 
     protected final ConfigValue.Loader<T> loader;
@@ -171,6 +173,11 @@ public class LangEntry<T extends LangValue> implements LangElement {
         }
 
         @NotNull
+        public <E extends Enum<E>> EnumLocale<E> enumeration(@NotNull Class<E> clazz, @NotNull Function<E, String> defaultMapper) {
+            return EnumLocale.create(this.path, clazz, defaultMapper);
+        }
+
+        @NotNull
         public <E extends Keyed> RegistryLocale<E> registry(@NotNull RegistryType<E> type) {
             return RegistryLocale.create(this.path, type);
         }
@@ -181,8 +188,18 @@ public class LangEntry<T extends LangValue> implements LangElement {
         }
 
         @NotNull
+        public ButtonLocale button(@NotNull String label, int width) {
+            return ButtonLocale.create(this.path, label, width);
+        }
+
+        @NotNull
         public ButtonLocale button(@NotNull String label, @Nullable String tooltip) {
             return ButtonLocale.create(this.path, label, tooltip);
+        }
+
+        @NotNull
+        public ButtonLocale button(@NotNull String label, @Nullable String tooltip, int width) {
+            return ButtonLocale.create(this.path, label, tooltip, width);
         }
 
         @NotNull

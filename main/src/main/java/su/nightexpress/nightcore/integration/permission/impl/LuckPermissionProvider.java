@@ -8,53 +8,52 @@ import net.luckperms.api.node.types.InheritanceNode;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import su.nightexpress.nightcore.integration.permission.PermissionPlugins;
 import su.nightexpress.nightcore.integration.permission.PermissionProvider;
 import su.nightexpress.nightcore.util.LowerCase;
-import su.nightexpress.nightcore.util.Plugins;
 
 import java.util.Collections;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class LuckPermissionProvider implements PermissionProvider {
 
-    private LuckPerms api;
-
-    @Override
-    public void setup() {
-        this.api = LuckPermsProvider.get();
-    }
-
-//    @NotNull
-//    private LuckPerms getAPI() {
-//        if (api == null) api = LuckPermsProvider.get();
-//
-//        return api;
-//    }
-
     @Override
     @NotNull
     public String getName() {
-        return Plugins.LUCK_PERMS;
+        return PermissionPlugins.LUCK_PERMS;
+    }
+
+    private LuckPerms api() {
+        return LuckPermsProvider.get();
     }
 
     @Nullable
     private User getUser(@NotNull Player player) {
-        return this.api.getUserManager().getUser(player.getUniqueId());
+        return this.api().getUserManager().getUser(player.getUniqueId());
     }
 
-//    @Nullable
-//    private static String getMetaNode(@NotNull Player player, @NotNull NodeType<? extends ChatMetaNode<?, ?>> type) {
-//        User user = getUser(player);
-//        if (user == null) return null;
-//
-//        return user.getNodes(type).stream().max(Comparator.comparingInt(ChatMetaNode::getPriority)).map(ChatMetaNode::getMetaValue).orElse(null);
-//    }
+    @NotNull
+    private CompletableFuture<User> loadUser(@NotNull UUID playerId) {
+        return api().getUserManager().loadUser(playerId);
+    }
 
     @Override
     @Nullable
     public String getPrimaryGroup(@NotNull Player player) {
-        User user = getUser(player);
+        return this.getPrimaryGroup(this.getUser(player));
+    }
+
+    @Override
+    @NotNull
+    public CompletableFuture<String> getPrimaryGroup(@NotNull UUID playerId) {
+        return this.loadUser(playerId).thenApplyAsync(this::getPrimaryGroup);
+    }
+
+    @Nullable
+    private String getPrimaryGroup(@Nullable User user) {
         if (user == null) return null;
 
         String group = user.getPrimaryGroup();
@@ -64,7 +63,17 @@ public class LuckPermissionProvider implements PermissionProvider {
     @Override
     @NotNull
     public Set<String> getPermissionGroups(@NotNull Player player) {
-        User user = getUser(player);
+        return this.getPermissionGroups(this.getUser(player));
+    }
+
+    @Override
+    @NotNull
+    public CompletableFuture<Set<String>> getPermissionGroups(@NotNull UUID playerId) {
+        return this.loadUser(playerId).thenApplyAsync(this::getPermissionGroups);
+    }
+
+    @NotNull
+    private Set<String> getPermissionGroups(@Nullable User user) {
         if (user == null) return Collections.emptySet();
 
         return user.getNodes(NodeType.INHERITANCE).stream().map(InheritanceNode::getGroupName).map(LowerCase.USER_LOCALE::apply).collect(Collectors.toSet());
@@ -73,18 +82,34 @@ public class LuckPermissionProvider implements PermissionProvider {
     @Override
     @Nullable
     public String getPrefix(@NotNull Player player) {
-        User user = getUser(player);
-        if (user == null) return null;
+        return this.getPrefix(this.getUser(player));
+    }
 
-        return user.getCachedData().getMetaData().getPrefix();
+    @Override
+    @NotNull
+    public CompletableFuture<String> getPrefix(@NotNull UUID playerId) {
+        return this.loadUser(playerId).thenApplyAsync(this::getPrefix);
+    }
+
+    @Nullable
+    public String getPrefix(@Nullable User user) {
+        return user == null ? null : user.getCachedData().getMetaData().getPrefix();
     }
 
     @Override
     @Nullable
     public String getSuffix(@NotNull Player player) {
-        User user = getUser(player);
-        if (user == null) return null;
+        return this.getSuffix(this.getUser(player));
+    }
 
-        return user.getCachedData().getMetaData().getSuffix();
+    @Override
+    @NotNull
+    public CompletableFuture<String> getSuffix(@NotNull UUID playerId) {
+        return this.loadUser(playerId).thenApplyAsync(this::getSuffix);
+    }
+
+    @Nullable
+    public String getSuffix(@Nullable User user) {
+        return user == null ? null : user.getCachedData().getMetaData().getSuffix();
     }
 }
