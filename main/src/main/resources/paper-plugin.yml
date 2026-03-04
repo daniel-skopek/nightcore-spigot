@@ -55,3 +55,6 @@ dependencies:
     Oraxen:
       load: AFTER
       required: false
+    CraftEngine:
+      load: AFTER
+      required: false

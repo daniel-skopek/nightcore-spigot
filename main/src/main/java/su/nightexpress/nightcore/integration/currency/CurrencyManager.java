@@ -100,7 +100,6 @@ public class CurrencyManager extends AbstractManager<NightCore> {
         this.addExternalLoader(CurrencyPlugins.VOTING_PLUGIN, () -> this.loadIncompleted(VotingPluginCurrency::new));
         this.addExternalLoader(CurrencyPlugins.ELITEMOBS, () -> this.loadIncompleted(EliteMobsCurrency::new));
         this.addExternalLoader(CurrencyPlugins.COINS_ENGINE, () -> CoinsEngineCurrency.getCurrencies().forEach(this::register));
-        this.addExternalLoader(CurrencyPlugins.ULTRA_ECONOMY, () -> UltraEconomyCurrency.getCurrencies().forEach(this::register));
 
         // Try load any provider(s) of the plugins that are already enabled aka loaded.
         this.pluginProviders.keySet().forEach(pluginName -> {
