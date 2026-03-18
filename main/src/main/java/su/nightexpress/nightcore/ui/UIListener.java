@@ -1,6 +1,5 @@
 package su.nightexpress.nightcore.ui;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -33,7 +32,7 @@ public class UIListener extends AbstractListener<NightCore> {
 
     private void handleDialogInput(@NotNull Player player, @NotNull Dialog dialog, @NotNull DialogInput input) {
         // Jump back to the main thread from async chat thread.
-        this.plugin.runTask(() -> {
+        this.plugin.runTask(player, () -> {
             if (input.getTextRaw().equalsIgnoreCase(DialogManager.EXIT) || dialog.getHandler().handle(input)) {
                 DialogManager.stopDialog(player);
             }
@@ -125,6 +124,6 @@ public class UIListener extends AbstractListener<NightCore> {
 
         viewer.getMenu().onClose(viewer, event);
 
-        Bukkit.getScheduler().runTaskLater(plugin, player::updateInventory, 1);
+        plugin.runTask(player, player::updateInventory);
     }
 }

@@ -1,15 +1,14 @@
 package su.nightexpress.nightcore.bridge.scheduler;
 
-import org.bukkit.Bukkit;
+import com.tcoded.folialib.wrapper.task.WrappedTask;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 
 public class DefaultBukkitTask implements AdaptedTask {
 
-    private final BukkitTask backend;
+    private final WrappedTask backend;
 
-    public DefaultBukkitTask(@NotNull BukkitTask backend) {
+    public DefaultBukkitTask(@NotNull WrappedTask backend) {
         this.backend = backend;
     }
 
@@ -26,12 +25,12 @@ public class DefaultBukkitTask implements AdaptedTask {
     @Override
     @NotNull
     public Plugin getOwningPlugin() {
-        return this.backend.getOwner();
+        return this.backend.getOwningPlugin();
     }
 
     @Override
     public boolean isCurrentlyRunning() {
-        return Bukkit.getServer().getScheduler().isCurrentlyRunning(this.backend.getTaskId());
+        return !this.backend.isCancelled();
     }
 
     @Override

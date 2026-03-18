@@ -7,8 +7,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
-import org.bukkit.scheduler.BukkitScheduler;
-import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nightcore.bridge.chat.UniversalChatEventHandler;
 import su.nightexpress.nightcore.bridge.scheduler.AdaptedScheduler;
@@ -21,8 +19,6 @@ import su.nightexpress.nightcore.locale.LangContainer;
 import su.nightexpress.nightcore.locale.LangElement;
 import su.nightexpress.nightcore.ui.inventory.MenuRegistry;
 import su.nightexpress.nightcore.util.wrapper.UniTask;
-
-import java.util.function.Consumer;
 
 public interface NightCorePlugin extends Plugin {
 
@@ -110,12 +106,6 @@ public interface NightCorePlugin extends Plugin {
 
     @NotNull MenuRegistry getMenuRegistry();
 
-    @Deprecated
-    @NotNull
-    default BukkitScheduler getScheduler() {
-        return this.getServer().getScheduler();
-    }
-
     @NotNull AdaptedScheduler scheduler();
 
     @NotNull PluginManager getPluginManager();
@@ -137,36 +127,6 @@ public interface NightCorePlugin extends Plugin {
     void runTaskTimer(@NotNull Runnable consumer, long delay, long interval);
 
     void runTaskTimerAsync(@NotNull Runnable consumer, long delay, long interval);
-
-    @Deprecated
-    default void runTask(@NotNull Consumer<BukkitTask> consumer) {
-        this.getScheduler().runTask(this, consumer);
-    }
-
-    @Deprecated
-    default void runTaskAsync(@NotNull Consumer<BukkitTask> consumer) {
-        this.getScheduler().runTaskAsynchronously(this, consumer);
-    }
-
-    @Deprecated
-    default void runTaskLater(@NotNull Consumer<BukkitTask> consumer, long delay) {
-        this.getScheduler().runTaskLater(this, consumer, delay);
-    }
-
-    @Deprecated
-    default void runTaskLaterAsync(@NotNull Consumer<BukkitTask> consumer, long delay) {
-        this.getScheduler().runTaskLaterAsynchronously(this, consumer, delay);
-    }
-
-    @Deprecated
-    default void runTaskTimer(@NotNull Consumer<BukkitTask> consumer, long delay, long interval) {
-        this.getScheduler().runTaskTimer(this, consumer, delay, interval);
-    }
-
-    @Deprecated
-    default void runTaskTimerAsync(@NotNull Consumer<BukkitTask> consumer, long delay, long interval) {
-        this.getScheduler().runTaskTimerAsynchronously(this, consumer, delay, interval);
-    }
 
     @NotNull
     @Deprecated

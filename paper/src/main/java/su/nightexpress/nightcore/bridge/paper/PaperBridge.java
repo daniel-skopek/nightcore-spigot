@@ -45,8 +45,7 @@ import su.nightexpress.nightcore.bridge.paper.dialog.PaperDialogAdapter;
 import su.nightexpress.nightcore.bridge.paper.dialog.PaperDialogListener;
 import su.nightexpress.nightcore.bridge.paper.event.PaperChatListener;
 import su.nightexpress.nightcore.bridge.paper.event.PaperEventAdapter;
-import su.nightexpress.nightcore.bridge.paper.scheduler.FoliaScheduler;
-import su.nightexpress.nightcore.bridge.paper.scheduler.PaperScheduler;
+import su.nightexpress.nightcore.bridge.scheduler.DefaultBukkitScheduler;
 import su.nightexpress.nightcore.bridge.paper.text.PaperTextComponentAdapter;
 import su.nightexpress.nightcore.bridge.scheduler.AdaptedScheduler;
 import su.nightexpress.nightcore.bridge.wrap.NightProfile;
@@ -114,7 +113,7 @@ public class PaperBridge implements Software {
     @Override
     @NotNull
     public AdaptedScheduler getScheduler(@NotNull JavaPlugin plugin) {
-        return Version.isFolia() ? new FoliaScheduler(plugin) : new PaperScheduler(plugin);
+        return new DefaultBukkitScheduler(plugin);
     }
 
     @Override
