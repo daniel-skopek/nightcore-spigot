@@ -128,6 +128,8 @@ public interface NightCorePlugin extends Plugin {
 
     void runTaskTimerAsync(@NotNull Runnable consumer, long delay, long interval);
 
+    void runNextTick(@NotNull Runnable consumer);
+
     @NotNull
     @Deprecated
     default UniTask createTask(@NotNull Runnable runnable) {

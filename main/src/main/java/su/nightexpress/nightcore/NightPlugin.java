@@ -406,4 +406,9 @@ public abstract class NightPlugin extends JavaPlugin implements NightCorePlugin 
     public void runTaskTimerAsync(@NotNull Runnable consumer, long delay, long interval) {
         this.scheduler.runTaskTimerAsync(consumer, delay, interval);
     }
+
+    @Override
+    public void runNextTick(@NotNull Runnable consumer) {
+        this.scheduler.runNextTick(consumer);
+    }
 }

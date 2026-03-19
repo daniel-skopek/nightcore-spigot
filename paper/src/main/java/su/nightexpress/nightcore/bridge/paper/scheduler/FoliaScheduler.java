@@ -35,6 +35,11 @@ public class FoliaScheduler implements AdaptedScheduler {
     }
 
     @Override
+    public void runNextTick(@NotNull Runnable runnable) {
+        this.globalRegionScheduler.run(this.plugin, task -> runnable.run());
+    }
+
+    @Override
     @NotNull
     public FoliaScheduledTask runTask(@NotNull Runnable runnable) {
         return new FoliaScheduledTask(this.globalRegionScheduler.run(this.plugin, task -> runnable.run()));

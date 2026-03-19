@@ -10,6 +10,8 @@ public interface AdaptedScheduler {
 
     void cancelTasks();
 
+    void runNextTick(@NotNull Runnable runnable);
+
     @NotNull AdaptedTask runTask(@NotNull Runnable runnable);
 
     @Nullable AdaptedTask runTask(@NotNull Entity entity, @NotNull Runnable runnable);

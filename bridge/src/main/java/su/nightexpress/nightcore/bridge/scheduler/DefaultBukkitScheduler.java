@@ -24,6 +24,11 @@ public class DefaultBukkitScheduler implements AdaptedScheduler {
     }
 
     @Override
+    public void runNextTick(@NotNull Runnable runnable) {
+        this.foliaLib.getScheduler().runNextTick(wrappedTask -> runnable.run());
+    }
+
+    @Override
     @NotNull
     public DefaultBukkitTask runTask(@NotNull Runnable runnable) {
         WrappedTask task = this.foliaLib.getScheduler().runLater(runnable, 0L);

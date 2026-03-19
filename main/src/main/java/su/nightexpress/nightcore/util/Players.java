@@ -362,31 +362,18 @@ public class Players {
 
     private static void dispatchCommand0(@NotNull Player player, @NotNull String command) {
         CommandSender sender = Bukkit.getConsoleSender();
-        boolean usePlayer = false;
 
         if (command.startsWith(PLAYER_COMMAND_PREFIX)) {
             command = command.substring(PLAYER_COMMAND_PREFIX.length());
             sender = player;
-            usePlayer = true;
         }
 
         command = Placeholders.forPlayerWithPAPI(player).apply(command).trim();
 
-        if (Version.isFolia()) {
-            if (usePlayer) {
-                CommandSender playerSender = sender;
-                String playerCommand = command;
-                NightCore.get().runTask(player, () -> Bukkit.dispatchCommand(playerSender, playerCommand));
-            }
-            else {
-                CommandSender consoleSender = sender;
-                String consoleCommand = command;
-                NightCore.get().runTask(() -> Bukkit.dispatchCommand(consoleSender, consoleCommand));
-            }
-        }
-        else {
-            Bukkit.dispatchCommand(sender, command);
-        }
+        CommandSender finalSender = sender;
+        String finalCommand = command;
+        
+        NightCore.get().runNextTick(() -> Bukkit.dispatchCommand(finalSender, finalCommand));
     }
 
     public static boolean hasEmptyInventory(@NotNull Player player) {
