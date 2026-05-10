@@ -39,7 +39,17 @@ public class NightTask {
         return createTask(plugin, () -> {
             if (interval <= 0) return null;
 
-            return plugin.scheduler().runTaskTimer(() -> CompletableFuture.runAsync(runnable), 0L, interval);
+            return plugin.scheduler().runTaskTimer(() -> {
+                CompletableFuture.runAsync(() -> {
+                    try {
+                        runnable.run();
+                    }
+                    catch (Exception exception) {
+                        plugin.error("Unhandled exception in async task!");
+                        exception.printStackTrace();
+                    }
+                });
+            }, 0L, interval);
         });
     }
 
