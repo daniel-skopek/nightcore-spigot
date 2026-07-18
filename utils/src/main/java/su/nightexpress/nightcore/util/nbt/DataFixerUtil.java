@@ -27,7 +27,7 @@ public class DataFixerUtil {
 
         int targetVersion = Version.getCurrent().getDataVersion();
         if (targetVersion <= 0) return compoundTag;
-        if (sourceVersion > targetVersion || sourceVersion <= 0) return compoundTag;
+        if (sourceVersion >= targetVersion || sourceVersion <= 0) return compoundTag;
 
         // Not necessary, but they used it for a reason probably.
         /*if (Version.isPaper()) {

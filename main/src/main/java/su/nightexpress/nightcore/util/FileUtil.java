@@ -174,8 +174,7 @@ public class FileUtil {
             }
         }
 
-        try {
-            JarFile jar = new JarFile(pluginFile);
+        try (JarFile jar = new JarFile(pluginFile)) {
             Enumeration<JarEntry> entries = jar.entries();
 
             while (entries.hasMoreElements()) {
@@ -187,17 +186,11 @@ public class FileUtil {
                 if (file.exists()) continue;
 
                 FileUtil.create(file);
-                InputStream inputStream = jar.getInputStream(entry);
-                FileOutputStream outputStream = new FileOutputStream(file);
-
-                while (inputStream.available() > 0) {
-                    outputStream.write(inputStream.read());
+                try (InputStream inputStream = jar.getInputStream(entry);
+                     FileOutputStream outputStream = new FileOutputStream(file)) {
+                    inputStream.transferTo(outputStream);
                 }
-                outputStream.close();
-                inputStream.close();
             }
-
-            jar.close();
         }
         catch (IOException exception) {
             exception.printStackTrace();

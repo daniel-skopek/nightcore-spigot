@@ -8,40 +8,58 @@ import su.nightexpress.nightcore.util.ItemTag;
 
 public class AdaptedVanillaStack extends AdaptedItemStack<ItemTag> {
 
-    private final ItemStack itemStack;
+    private ItemStack itemStack;
+    private boolean parsed;
 
     public AdaptedVanillaStack(@NotNull ItemTag itemTag) {
         super(VanillaItemAdapter.INSTANCE, itemTag);
-        this.itemStack = this.adapter.toItemStack(itemTag);
     }
 
     @NotNull
     public static AdaptedVanillaStack of(@NotNull ItemStack itemStack) {
         ItemTag tag = ItemTag.of(itemStack);
-        return new AdaptedVanillaStack(tag);
+
+        AdaptedVanillaStack stack = new AdaptedVanillaStack(tag);
+        stack.itemStack = new ItemStack(itemStack);
+        stack.parsed = true;
+        return stack;
+    }
+
+    @Nullable
+    private synchronized ItemStack resolve() {
+        if (!this.parsed) {
+            this.itemStack = this.adapter.toItemStack(this.data);
+            this.parsed = true;
+        }
+        return this.itemStack;
     }
 
     @Override
     public boolean isValid() {
-        return this.itemStack != null;
+        return this.resolve() != null;
     }
 
     @Override
     public int getAmount() {
-        return this.itemStack == null ? 0 : this.itemStack.getAmount();
+        ItemStack itemStack = this.resolve();
+
+        return itemStack == null ? 0 : itemStack.getAmount();
     }
 
     @Override
     @Nullable
     public ItemStack getItemStack() {
-        return this.itemStack == null ? null : new ItemStack(this.itemStack);
+        ItemStack itemStack = this.resolve();
+
+        return itemStack == null ? null : new ItemStack(itemStack);
     }
 
     @Override
     public boolean isSimilar(@NotNull ItemTag other) {
-        if (this.itemStack == null) return false;
+        ItemStack itemStack = this.resolve();
+        if (itemStack == null) return false;
 
         ItemStack otherStack = this.adapter.toItemStack(other);
-        return otherStack != null && otherStack.isSimilar(this.itemStack);
+        return otherStack != null && otherStack.isSimilar(itemStack);
     }
 }
