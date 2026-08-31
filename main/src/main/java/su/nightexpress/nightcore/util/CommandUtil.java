@@ -79,9 +79,8 @@ public class CommandUtil {
 
     @NotNull
     public static Optional<Command> getCommand(@NotNull String name) {
-        return getCommandMap().getCommands().stream()
-            .filter(command -> command.getName().equalsIgnoreCase(name) || command.getLabel().equalsIgnoreCase(name) || command.getAliases().contains(name))
-            .findFirst();
+        Command command = Software.get().getKnownCommands(getCommandMap()).get(name.toLowerCase(Locale.ROOT));
+        return Optional.ofNullable(command);
     }
 
     @NotNull
