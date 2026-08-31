@@ -86,7 +86,7 @@ public class ItemHandler {
 
     @NotNull
     public static ItemHandler forClose(@NotNull Menu menu) {
-        return new ItemHandler(CLOSE, (viewer, event) -> menu.runNextTick(() -> viewer.getPlayer().closeInventory()));
+        return new ItemHandler(CLOSE, (viewer, event) -> menu.runNextTick(viewer.getPlayer(), viewer.getPlayer()::closeInventory));
     }
 
     @NotNull

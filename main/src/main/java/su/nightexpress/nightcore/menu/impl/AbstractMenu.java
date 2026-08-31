@@ -128,6 +128,11 @@ public abstract class AbstractMenu<P extends NightCorePlugin> implements Menu {
     }
 
     @Override
+    public void runNextTick(@NotNull Player player, @NotNull Runnable runnable) {
+        this.plugin.runTask(player, runnable);
+    }
+
+    @Override
     public void flush(@NotNull Player player) {
         this.open(player);
     }

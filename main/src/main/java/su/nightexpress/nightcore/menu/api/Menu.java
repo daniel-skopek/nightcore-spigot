@@ -42,6 +42,8 @@ public interface Menu {
 
     void runNextTick(@NotNull Runnable runnable);
 
+    void runNextTick(@NotNull Player player, @NotNull Runnable runnable);
+
     void onClick(@NotNull MenuViewer viewer, @NotNull ClickResult result, @NotNull InventoryClickEvent event);
 
     void onDrag(@NotNull MenuViewer viewer, @NotNull InventoryDragEvent event);

@@ -98,6 +98,11 @@ public abstract class AbstractMenu<P extends NightPlugin> implements Menu {
         this.plugin.runTask(runnable);
     }
 
+    @Override
+    public void runNextTick(@NotNull Player player, @NotNull Runnable runnable) {
+        this.plugin.runTask(player, runnable);
+    }
+
     public void flush() {
         this.getViewers().forEach(this::flush);
     }
@@ -309,7 +314,7 @@ public abstract class AbstractMenu<P extends NightPlugin> implements Menu {
         DialogManager.startDialog(dialog);
         Player player = dialog.getPlayer();
 
-        this.runNextTick(player::closeInventory);
+        this.runNextTick(player, player::closeInventory);
     }
 
     @Override
