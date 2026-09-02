@@ -5,6 +5,7 @@ description: Plugin core
 author: NightExpress
 api-version: 1.20
 load: STARTUP
+folia-supported: true
 libraries:
   - com.zaxxer:HikariCP:6.3.2
   - it.unimi.dsi:fastutil-core:8.5.16

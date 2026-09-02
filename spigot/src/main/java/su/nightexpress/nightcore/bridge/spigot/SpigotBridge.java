@@ -38,7 +38,7 @@ import su.nightexpress.nightcore.bridge.spigot.dialog.SpigotDialogAdapter;
 import su.nightexpress.nightcore.bridge.spigot.dialog.SpigotDialogListener;
 import su.nightexpress.nightcore.bridge.spigot.event.SpigotChatListener;
 import su.nightexpress.nightcore.bridge.spigot.event.SpigotEventAdapter;
-import su.nightexpress.nightcore.bridge.scheduler.DefaultBukkitScheduler;
+import su.nightexpress.nightcore.bridge.spigot.scheduler.SpigotScheduler;
 import su.nightexpress.nightcore.bridge.spigot.text.SpigotTextComponentAdapter;
 import su.nightexpress.nightcore.bridge.wrap.NightProfile;
 import su.nightexpress.nightcore.util.*;
@@ -115,7 +115,7 @@ public class SpigotBridge implements Software {
     @Override
     @NotNull
     public AdaptedScheduler getScheduler(@NotNull JavaPlugin plugin) {
-        return new DefaultBukkitScheduler(plugin);
+        return new SpigotScheduler(plugin);
     }
 
     @Override

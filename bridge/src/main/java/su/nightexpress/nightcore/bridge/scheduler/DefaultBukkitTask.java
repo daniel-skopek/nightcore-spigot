@@ -1,14 +1,14 @@
 package su.nightexpress.nightcore.bridge.scheduler;
 
-import com.tcoded.folialib.wrapper.task.WrappedTask;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 
 public class DefaultBukkitTask implements AdaptedTask {
 
-    private final WrappedTask backend;
+    private final BukkitTask backend;
 
-    public DefaultBukkitTask(@NotNull WrappedTask backend) {
+    public DefaultBukkitTask(@NotNull BukkitTask backend) {
         this.backend = backend;
     }
 
@@ -25,7 +25,7 @@ public class DefaultBukkitTask implements AdaptedTask {
     @Override
     @NotNull
     public Plugin getOwningPlugin() {
-        return this.backend.getOwningPlugin();
+        return this.backend.getOwner();
     }
 
     @Override
